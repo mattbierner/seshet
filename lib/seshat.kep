@@ -11,35 +11,23 @@ var max = \x, y -> (x > y ? x : y);
 var height = \root ->
     (!root ? 0 :
         max(
-            (root.left ? 1 + height(root.left) : 0),
-            (root.right ? 1 + height(root.right) : 0)));
-
+            (root.left ? 1 + root.left.height : 0),
+            (root.right ? 1 + root.right.height : 0)));
 
 /* Data Structures
  ******************************************************************************/
-// Window
-////////////////////////////////////////
-var Window = function(lower, upper) {
-    this.lower = lower;
-    this.upper = upper;
-};
-
 // Cell
 ////////////////////////////////////////
 /**
- * Match cell for memoization.
+ * Memoization cell
  * 
- * Stores a value for a given state.
- * Can be asked to perform a lookup for a state, in which it may return 'val' 
- * or delegate to another match cell.
+ * Stores a value for a given id. Cells form a linked list.
  */
 var Cell = function(id, val, delegate) {
     this.id = id;
     this.val = val;
     this.delegate = delegate;
 };
-
-Cell.prototype.toString = \() -> this.id + ":" + this.val + ", " + this.delegate;
 
 /**
  * Lookup a value, if any, stored in a match cell for 'state'.
@@ -64,10 +52,6 @@ var Node = function(key, cell, l, r, height) {
     this.height = height;
 };
 
-/**
- */
-Node.prototype.compare = \pos -> this.key.compare(pos);
-
 Node.setChildren = \node, l, r ->
     new Node(
         node.key,
@@ -75,7 +59,6 @@ Node.setChildren = \node, l, r ->
         l,
         r,
         1 + max(height(l), height(r)));
-
 
 Node.setLeft = \node, l ->
     Node.setChildren(node, l, node.right);
@@ -160,18 +143,17 @@ Node.update = \root, compare, pos, id, val -> {
         return df(node.left) <= -1 ? lr(node) : ll(node);
     else if (d < -1) 
         return df(node.right) >= 1 ? rl(node) : rr(node);
-    else
-        return node;
+    return node;
 };
 
-
+/**
+ * 
+ */
 Node.rebalance = \root -> {
     var d = df(root);
     if (d > 1 || d < -1) {
-        var l = Node.rebalance(root.left);
-        var r = Node.rebalance(root.right);
-        var node = Node.setChildren(root, l, r);
-        var d = df(root);
+        var node = Node.setChildren(root, Node.rebalance(root.left), Node.rebalance(root.right));
+        var d = df(node);
         if (d > 1)
             return (df(node.left) <= -1 ? lr(node) : ll(node));
         else if (d < -1) 

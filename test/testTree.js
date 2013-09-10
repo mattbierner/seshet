@@ -84,6 +84,14 @@ function(seshat){
                 for (var i = 0; i < 16; ++i)
                     assert.deepEqual(seshat.lookup(m, z[i], 0), [z[i], 0]);
             }],
+            ["Insert Same Id multiple Times gets latest",
+            function(){
+                var m = seshat.create(compareInt);
+                for (var i = 1; i < 5; ++i)
+                    m = seshat.update(m, 0, 0, i);
+
+                assert.equal(seshat.lookup(m, 0, 0), 4);
+            }]
         ],
     };
 });
