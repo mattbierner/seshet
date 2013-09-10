@@ -10,8 +10,8 @@ data structure for use with memoization. One use case is memoizing
 the results of computations in sequence, especially for parsing. The exposed
 interfaces are all functional-style.
 
-It generally provides good access and update performance by using a self balancing
-tree. The tree can also be pruned to discard unreachable values.
+In most cases, Seshat has good access and update performance by using a self
+balancing tree. The tree can also be pruned to discard unreachable values.
 
 
 # Example
@@ -19,6 +19,8 @@ tree. The tree can also be pruned to discard unreachable values.
 Calculating the Fibonacci sequence is the classic example of why memorization
 matters. Although not the best application of Seshat, this demonstration implements
 the Fibonacci sequence using Seshat.
+
+### Basic Algorithm
 
 The basic logic for calculating Fibonacci number `n` is:
 
@@ -40,16 +42,17 @@ recalculated on every call, even when the calculation has been performed before.
 Memoization stores past results in a table to provide constant time lookup.
 In this problem, only the previous two values need to be stored.
 
+### Basic Memoization
+
 Seshat operates on an memoization data structure, so `fib` is rewritten to take the
-opaque memoization table as an argument. The memo table needs to be threaded though the
-continuations as well.
+opaque memoization table as an argument. The memo table is immutable, and needs
+to be threaded though the continuations.
 
 Vales are stored using two dimensional keys. The first part of the key is used
 for storing the value in a tree and the second part for looking up a specific
-instance of the value on a node. For example, have the first part be an array
-index and the second part be the arguments of a function. In the Fibonacci function,
-only one dimensional storage is needed. The first part of the key will be the
-Fibonacci number, 0, 1, 2, 3, ....
+instance of the value on a node.  In the Fibonacci function, only one dimensional
+storage is needed. The first part of the key will be the
+Fibonacci number, and the second will always be zero.
 
 Updating the `fib` function to take advantage of Seshat, before entering the
 Fibonacci logic, the memo table is checked. If a result is found, it is
@@ -66,9 +69,9 @@ returned right away. Otherwise, the calculation is performed and the result is s
                     k(x + y, seshat.update(m, n, 0, x + y)))));
     };
 
-Now large Fibonacci numbers can be calculated. A key ordering function
-is defined for the key we selected and a new memoization table passed to the first
-call of `fib`.
+Now large Fibonacci numbers can be calculated. A key ordering function `compareInt`
+is defined for the keys of the memoization table. On the first call of `fib`,
+a new, empty memoer is created.
 
     var compareInt = \x, y ->  x - y;
     
@@ -83,7 +86,7 @@ the table should always be treated as an opaque data structure):
 
     var m = fib(100, seshat.create(compareInt), \_, m -> m);
     
-    var count = root ->
+    var count = \root ->
         (!root ? 0 :
             1 + count(root.left) + count(root.right));
     

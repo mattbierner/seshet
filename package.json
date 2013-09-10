@@ -1,18 +1,14 @@
 {
-  "name": "parse.js",
-  "version": "13.0.4",
+  "name": "seshat",
+  "version": "0.0.0",
   "description": "Combinatory Parsing Library",
-  "main": "lib/parse.js",
+  "main": "lib/seshat.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/mattbierner/parse.js.git"
+    "url": "git://github.com/mattbierner/seshat.git"
   },
   "keywords": [
-    "parse",
-    "parser",
-    "combinatorial",
-    "combinatory",
-    "combinatory parsing",
+    "memoization",
     "functional"
   ],
   "author": "Matt Bierner",
