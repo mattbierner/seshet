@@ -4,7 +4,7 @@
 static define;
 define([],
 function() {
-"use strict";
+//"use strict";
 
 var max = \x, y -> (x > y ? x : y);
 
@@ -16,6 +16,10 @@ var height = \root ->
         max(
             heightFromChild(root.left),
             heightFromChild(root.right)));
+
+var bf = \node ->
+    (!node ? 0 :
+        heightFromChild(node.left) - heightFromChild(node.right));
 
 /* Data Structures
  ******************************************************************************/
@@ -99,7 +103,7 @@ Node.put = \node, id, val ->
 /* Tree Operations
  ******************************************************************************/
 /**
- * 
+ * Right rotation
  */
 var rr = \node -> 
     (!node ? node :
@@ -109,7 +113,7 @@ var rr = \node ->
                 node,
                 node.right.left)));
 /**
- * 
+ * Left rotation
  */
 var ll = \node ->
     (!node ? node :
@@ -119,45 +123,51 @@ var ll = \node ->
                 node,
                 node.left.right)));
 
+/**
+ * Left-right rotation
+ */
 var lr = \node ->
     ll(Node.setLeft(node, rr(node.left)));
 
+/**
+ * Right-left rotation.
+ */
 var rl = \node ->
     rr(Node.setRight(node, ll(node.right)));
 
-var df = \node ->
-    (!node ? 0 :
-        heightFromChild(node.left) - heightFromChild(node.right));
-
+/**
+ * Perform a single rotation based on the balance factor.
+ */
 var rot = \node -> {
-    var d = df(node);
+    var d = bf(node);
     if (d > 1)
-        return (df(node.left) <= -1 ? lr(node) : ll(node));
+        return (bf(node.left) <= -1 ? lr(node) : ll(node));
     else if (d < -1) 
-        return (df(node.right) >= 1 ? rl(node) : rr(node));
+        return (bf(node.right) >= 1 ? rl(node) : rr(node));
     return node;
 };
 
 /**
+ * Update the value stored for `key` and `id`.
  */
-Node.update = \root, compare, pos, id, val -> {
+Node.update = \root, compare, key, id, val -> {
     if (!root)
-        return new Node(pos, new Cell(id, val, null), null, null, 0);
+        return new Node(key, new Cell(id, val, null), null, null, 0);
     
-    var diff = compare(pos, root.key);
+    var diff = compare(key, root.key);
     if (diff === 0)
         return Node.put(root, id, val);
     
     return rot(diff < 0 ?
-        Node.setLeft(root, Node.update(root.left, compare, pos, id, val)) :
-        Node.setRight(root, Node.update(root.right, compare, pos, id, val)));
+        Node.setLeft(root, Node.update(root.left, compare, key, id, val)) :
+        Node.setRight(root, Node.update(root.right, compare, key, id, val)));
 };
 
 /**
- * 
+ * Completely rebalance a given tree.
  */
 Node.rebalance = \root ->
-    (Math.abs(df(root)) <= 1 ? root :
+    (Math.abs(bf(root)) <= 1 ? root :
         rot(
             Node.setChildren(
                 root,
@@ -165,6 +175,9 @@ Node.rebalance = \root ->
                 Node.rebalance(root.right))));
 
 /**
+ * Prune a given tree to remove node outside of `[lower, upper)`.
+ * 
+ * Does not automatically rebalance.
  */
 Node.prune =  \root, compare, lower, upper -> {
     if (!root)
@@ -200,23 +213,31 @@ var Memoer = function(compare, root) {
     this.root = root;
 };
 
-/**
- */
 Memoer.setRoot = \m, root ->
     new Memoer(
         m.compare,
         root);
 
-/* Operations
+/* API
  ******************************************************************************/
+/**
+ * Create a new memoer.
+ * 
+ * @param comparison Function that compares two keys, returning their relative order.
+ */
 var create = \compare ->
     new Memoer(
         compare,
-        null,
-        []);
+        null);
 
 /**
- * Lookup a value, if any, stored in a match cell for 'state'.
+ * Lookup a value.
+ * 
+ * Returns null if none.
+ * 
+ * @param m Memoer
+ * @param key Key for node.
+ * @param id Unique identifier for result.
  */
 var lookup = \m, key, id ->
     Node.lookup(
@@ -226,23 +247,41 @@ var lookup = \m, key, id ->
         id);
 
 /**
+ * Store a value
+ * 
+ * Replaces existing value
+ * 
+ * @param m Memoer
+ * @param key Key for node.
+ * @param id Unique identifier for result.
+ * @param val Value to store.
  */
-var update = \m, pos, id, val ->
+var update = \m, key, id, val ->
     Memoer.setRoot(
         m,
-        Node.update(m.root, m.compare, pos, id, val));
+        Node.update(
+            m.root,
+            m.compare,
+            key,
+            id,
+            val));
 
 /**
+ * Prune memoer to exclude values outside of `[lower, upper)`
  * 
+ * @param m Memoer
+ * @param lower Inclusive lower bound.
+ * @param [upper] Exclusive upper bound.
  */
 var prune = \m, lower, upper ->
     Memoer.setRoot(
         m,
-        Node.rebalance(Node.prune(
-            m.root,
-            m.compare,
-            lower,
-            upper)));
+        Node.rebalance(
+            Node.prune(
+                m.root,
+                m.compare,
+                lower,
+                upper)));
 
 /* Export
  ******************************************************************************/
