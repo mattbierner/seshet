@@ -4,7 +4,9 @@
 static define;
 define([],
 function() {
-//"use strict";
+"use strict";
+
+var equals = \x, y -> x === y;
 
 var max = \x, y -> (x > y ? x : y);
 
@@ -41,9 +43,9 @@ var Cell = function(id, val, delegate) {
 /**
  * Lookup a value, if any, stored in a match cell for 'state'.
  */
-Cell.lookup = \base, id -> {
+Cell.lookup = \base, eq, id -> {
     for (var cell = base; cell; cell = cell.delegate)
-        if (cell.id === id)
+        if (eq(cell.id, id))
             return cell.val;
     return null;
 };
@@ -77,11 +79,11 @@ Node.setRight = \node, r ->
 
 /**
  */
-Node.lookup = \root, compare, key, id -> {
+Node.lookup = \root, compare, eq, key, id -> {
     for (var node = root; node;) {
         var diff = compare(key, node.key);
         if (diff === 0)
-            return Cell.lookup(node.cell, id);
+            return Cell.lookup(node.cell, eq, id);
         node = (diff < 0 ? node.left : node.right);
     }
     return null;
@@ -206,16 +208,19 @@ Node.prune =  \root, compare, lower, upper -> {
  * Stores values by a comparable key and unique id.
  * 
  * @param compare Function that compares two keys, returning their relative order.
+ * @param eq Predicate function that determines if two identities are equal.
  * @param root Root of the tree.
  */
-var Memoer = function(compare, root) {
+var Memoer = function(compare, eq, root) {
     this.compare = compare;
+    this.eq = eq;
     this.root = root;
 };
 
 Memoer.setRoot = \m, root ->
     new Memoer(
         m.compare,
+        m.eq,
         root);
 
 /* API
@@ -224,10 +229,12 @@ Memoer.setRoot = \m, root ->
  * Create a new memoer.
  * 
  * @param comparison Function that compares two keys, returning their relative order.
+ * @param [eq] Predicate function that determines if two identities are equal.
  */
-var create = \compare ->
+var create = \compare, eq ->
     new Memoer(
         compare,
+        (eq || equals),
         null);
 
 /**
@@ -243,6 +250,7 @@ var lookup = \m, key, id ->
     Node.lookup(
         m.root,
         m.compare,
+        m.eq,
         key,
         id);
 
@@ -267,7 +275,7 @@ var update = \m, key, id, val ->
             val));
 
 /**
- * Prune memoer to exclude values outside of `[lower, upper)`
+ * Prune memoer to exclude key values outside of `[lower, upper)`
  * 
  * @param m Memoer
  * @param lower Inclusive lower bound.
