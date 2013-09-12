@@ -1,7 +1,7 @@
 {
   "name": "seshat",
-  "version": "0.0.0",
-  "description": "Combinatory Parsing Library",
+  "version": "0.0.1",
+  "description": "Functional memoization Utility",
   "main": "lib/seshat.js",
   "repository": {
     "type": "git",
