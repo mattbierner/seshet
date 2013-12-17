@@ -1,14 +1,16 @@
 /**
  * @fileOverview Memoization utility.
  */
-static define;
-define([],
-function() {
-"use strict";
+package (
+    create
+    lookup
+    update
+    prune)
+{
 
-var equals = \x, y -> x === y;
+var equals = \x y -> x === y;
 
-var max = \x, y -> (x > y ? x : y);
+var max = \x y -> (x > y ? x : y);
 
 var heightFromChild = \child ->
     (child ? 1 + child.height : 0);
@@ -43,7 +45,7 @@ var Cell = function(id, val, delegate) {
 /**
  * Lookup a value, if any, stored in a match cell for 'state'.
  */
-Cell.lookup = \base, eq, id -> {
+Cell.lookup = \base eq id -> {
     for (var cell = base; cell; cell = cell.delegate)
         if (eq(cell.id, id))
             return cell.val;
@@ -63,7 +65,7 @@ var Node = function(key, cell, l, r, height) {
     this.height = height;
 };
 
-Node.setChildren = \node, l, r ->
+Node.setChildren = \node l r ->
     new Node(
         node.key,
         node.cell,
@@ -71,15 +73,15 @@ Node.setChildren = \node, l, r ->
         r,
         (l || r ? 1 + max(height(l), height(r)) : 0));
 
-Node.setLeft = \node, l ->
+Node.setLeft = \node l ->
     Node.setChildren(node, l, node.right);
     
-Node.setRight = \node, r ->
+Node.setRight = \node r ->
     Node.setChildren(node, node.left, r);
 
 /**
  */
-Node.lookup = \root, compare, eq, key, id -> {
+Node.lookup = \root compare eq key id -> {
     for (var node = root; node;) {
         var diff = compare(key, node.key);
         if (diff === 0)
@@ -91,7 +93,7 @@ Node.lookup = \root, compare, eq, key, id -> {
 
 /**
  */
-Node.put = \node, id, val ->
+Node.put = \node id val ->
     new Node(
         node.key,
         new Cell(
@@ -152,7 +154,7 @@ var rot = \node -> {
 /**
  * Update the value stored for `key` and `id`.
  */
-Node.update = \root, compare, key, id, val -> {
+Node.update = \root compare key id val -> {
     if (!root)
         return new Node(key, new Cell(id, val, null), null, null, 0);
     
@@ -181,7 +183,7 @@ Node.rebalance = \root ->
  * 
  * Does not automatically rebalance.
  */
-Node.prune =  \root, compare, lower, upper -> {
+Node.prune =  \root compare lower upper -> {
     if (!root)
         return root;
     
@@ -217,7 +219,7 @@ var Memoer = function(compare, eq, root) {
     this.root = root;
 };
 
-Memoer.setRoot = \m, root ->
+Memoer.setRoot = \m root ->
     new Memoer(
         m.compare,
         m.eq,
@@ -231,7 +233,7 @@ Memoer.setRoot = \m, root ->
  * @param comparison Function that compares two keys, returning their relative order.
  * @param [eq] Predicate function that determines if two identities are equal.
  */
-var create = \compare, eq ->
+create = \compare eq ->
     new Memoer(
         compare,
         (eq || equals),
@@ -246,7 +248,7 @@ var create = \compare, eq ->
  * @param key Key for node.
  * @param id Unique identifier for result.
  */
-var lookup = \m, key, id ->
+lookup = \m key id ->
     Node.lookup(
         m.root,
         m.compare,
@@ -264,7 +266,7 @@ var lookup = \m, key, id ->
  * @param id Unique identifier for result.
  * @param val Value to store.
  */
-var update = \m, key, id, val ->
+update = \m key id val ->
     Memoer.setRoot(
         m,
         Node.update(
@@ -281,7 +283,7 @@ var update = \m, key, id, val ->
  * @param lower Inclusive lower bound.
  * @param [upper] Exclusive upper bound.
  */
-var prune = \m, lower, upper ->
+prune = \m lower upper ->
     Memoer.setRoot(
         m,
         Node.rebalance(
@@ -290,14 +292,4 @@ var prune = \m, lower, upper ->
                 m.compare,
                 lower,
                 upper)));
-
-/* Export
- ******************************************************************************/
-return {
-    'create': create,
-    'lookup': lookup,
-    'update': update,
-    'prune': prune
-};
-
-});
+}
