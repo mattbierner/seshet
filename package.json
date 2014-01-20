@@ -1,6 +1,6 @@
 {
-    "name": "seshat",
-    "version": "0.0.1",
+    "name": "seshet",
+    "version": "0.1.0",
     "description": "Functional memoization Utility",
     "keywords": [
         "memoization",
@@ -11,10 +11,10 @@
   
     "repository": {
         "type": "git",
-        "url": "git://github.com/mattbierner/seshat.git"
+        "url": "git://github.com/mattbierner/seshet.git"
     },
   
-    "main": "dist_node/seshat.js",
+    "main": "dist_node/seshet.js",
     "directories": {
         "lib": "dist_node"
     },

@@ -1,4 +1,4 @@
-var seshat = require('../dist_node/seshat');
+var seshat = require('../dist_node/seshet');
 
 var max = function(x, y) { return x > y ? x : y; };
 var compareInt = function(x, y) { return x - y; };

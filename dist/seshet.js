@@ -1,13 +1,10 @@
 /*
- * THIS FILE IS AUTO GENERATED from 'lib/seshat.kep'
+ * THIS FILE IS AUTO GENERATED from 'lib/seshet.kep'
  * DO NOT EDIT
 */
 define(["require", "exports"], (function(require, exports) {
     "use strict";
     var create, lookup, update, prune;
-    var equals = (function(x, y) {
-        return (x === y);
-    });
     var max = (function(x, y) {
         return ((x > y) ? x : y);
     });
@@ -108,9 +105,15 @@ define(["require", "exports"], (function(require, exports) {
     (Memoer.setRoot = (function(m, root) {
         return new(Memoer)(m.compare, m.eq, root);
     }));
-    (create = (function(compare, eq) {
-        return new(Memoer)(compare, (eq || equals), null);
-    }));
+    (create = (function() {
+            var equals = (function(x, y) {
+                return (x === y);
+            });
+            return (function(compare, eq) {
+                return new(Memoer)(compare, (eq || equals), null);
+            });
+        })
+        .call(this));
     (lookup = (function(m, key, id) {
         return Node.lookup(m.root, m.compare, m.eq, key, id);
     }));
@@ -124,4 +127,4 @@ define(["require", "exports"], (function(require, exports) {
     (exports.lookup = lookup);
     (exports.update = update);
     (exports.prune = prune);
-}))
+}));

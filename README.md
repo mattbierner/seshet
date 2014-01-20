@@ -1,4 +1,4 @@
-seshat
+Seshet
 ======
 
 Javascript Functional Memorization Utility
