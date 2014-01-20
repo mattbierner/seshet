@@ -1,16 +1,34 @@
 {
-  "name": "seshat",
-  "version": "0.0.1",
-  "description": "Functional memoization Utility",
-  "main": "lib/seshat.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/mattbierner/seshat.git"
-  },
-  "keywords": [
-    "memoization",
-    "functional"
-  ],
-  "author": "Matt Bierner",
-  "license": "MIT"
+    "name": "seshat",
+    "version": "0.0.1",
+    "description": "Functional memoization Utility",
+    "keywords": [
+        "memoization",
+        "functional"
+    ],
+    "author": "Matt Bierner",
+    "license": "MIT",
+  
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/mattbierner/seshat.git"
+    },
+  
+    "main": "dist_node/seshat.js",
+    "directories": {
+        "lib": "dist_node"
+    },
+    "files": [
+        "dist_node/",
+        "lib",
+        "test"
+    ],
+    "dependencies": {},
+    "devDependencies": {
+        "nodeunit": "0.8.x"
+    },
+    
+    "scripts": {
+        "test": "node test.js"
+    }
 }

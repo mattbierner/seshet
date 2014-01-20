@@ -8,8 +8,6 @@ package (
     prune)
 {
 
-var equals = \x y -> x === y;
-
 var max = \x y -> (x > y ? x : y);
 
 var heightFromChild = \child ->
@@ -75,7 +73,7 @@ Node.setChildren = \node l r ->
 
 Node.setLeft = \node l ->
     Node.setChildren(node, l, node.right);
-    
+
 Node.setRight = \node r ->
     Node.setChildren(node, node.left, r);
 
@@ -116,6 +114,7 @@ var rr = \node ->
             Node.setRight(
                 node,
                 node.right.left)));
+
 /**
  * Left rotation
  */
@@ -183,7 +182,7 @@ Node.rebalance = \root ->
  * 
  * Does not automatically rebalance.
  */
-Node.prune =  \root compare lower upper -> {
+Node.prune = \root compare lower upper -> {
     if (!root)
         return root;
     
@@ -233,11 +232,14 @@ Memoer.setRoot = \m root ->
  * @param comparison Function that compares two keys, returning their relative order.
  * @param [eq] Predicate function that determines if two identities are equal.
  */
-create = \compare eq ->
-    new Memoer(
-        compare,
-        (eq || equals),
-        null);
+create = let
+    equals = \x y -> x === y
+in
+    \compare eq ->
+        new Memoer(
+            compare,
+            (eq || equals),
+            null);
 
 /**
  * Lookup a value.
@@ -292,4 +294,5 @@ prune = \m lower upper ->
                 m.compare,
                 lower,
                 upper)));
+
 }
